@@ -20,7 +20,7 @@ module.exports = {
     es6: true,
   },
   ignorePatterns: ["!**/.server", "!**/.client"],
-
+  // rules: [{ "@typescript-eslint/no-explicit-any": "off" }],
   // Base config
   extends: ["eslint:recommended"],
 
