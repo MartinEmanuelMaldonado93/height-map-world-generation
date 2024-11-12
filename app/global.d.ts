@@ -6,6 +6,12 @@ declare class SimplexNoise {
   constructor(seed?: string | number);
   noise2D(x: number, y: number): number;
 }
+// declare module "https://cdn.jsdelivr.net/npm/three@0.112.1/examples/jsm/objects/Sky.js" {
+//   export class Sky {}
+// }
+declare module "three-sky" {
+  export default class Sky {}
+}
 
 // declare module "https://cdn.jsdelivr.net/npm/three@0.112.1/examples/jsm/WebGL.js" {
 //   class WEBGL {

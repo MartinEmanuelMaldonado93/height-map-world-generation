@@ -1,68 +1,71 @@
-// import * as THREE from "three";
-// import WEBGL from "https://cdn.jsdelivr.net/npm/three@0.112.1/examples/jsm/WebGL.js";
-import { _Graphics, imageAPI } from "./graphics.js";
+import { _Graphics, graphics } from "./graphics";
+import { WEBGL } from "./utils";
 
-export class Game {
-  private static _graphics: _Graphics;
-  private static _previousRAF: number | null = null;
-  private static _minFrameTime: number = 1.0 / 10.0;
-  private static _entities: { [key: string]: any } = {};
-  private imageApi: ReturnType<typeof imageAPI>;
+export class _Game {
+  _graphics: _Graphics;
+  _previousRAF: number | null = null;
+  _minFrameTime: number = 1.0 / 10.0;
+  _entities: { [key: string]: any } = {};
+  imageApi = {
+    GetImageData: graphics.GetImageData,
+    GetPixel: graphics.GetPixel,
+  };
 
   constructor() {
-    this.imageApi = imageAPI();
-    Game._Initialize();
+    this._graphics = new graphics.Graphics();
+    this._Initialize();
+  }
+  //** Initialize RAF  * /
+  private _Initialize(): void {
+    this._OnInitialize();
+    this._RAF();
   }
 
-  private static _Initialize(): void {
-    Game._graphics = new _Graphics();
-    if (!Game._graphics.Initialize()) {
-      Game._DisplayError("WebGL2 is not available.");
-      return;
-    }
-    console.log("WebGL2 is available");
-    Game._OnInitialize();
-    Game._RAF();
-  }
-
-  private static _DisplayError(errorText: string): void {
+  private _DisplayError(errorText: string): void {
     const error = document.getElementById("error");
     if (error) {
       error.innerText = errorText;
     }
   }
 
-  private static _RAF(): void {
+  private _RAF(): void {
     requestAnimationFrame((t) => {
-      if (Game._previousRAF === null) {
-        Game._previousRAF = t;
+      if (this._previousRAF === null) {
+        this._previousRAF = t;
       }
-      Game._Render(t - Game._previousRAF);
-      Game._previousRAF = t;
+      this._Render(t - this._previousRAF);
+      this._previousRAF = t;
     });
   }
 
-  private static _StepEntities(timeInSeconds: number): void {
-    for (let k in Game._entities) {
-      Game._entities[k].Update(timeInSeconds);
+  _StepEntities(timeInSeconds: number): void {
+    for (let k in this._entities) {
+      this._entities[k].Update(timeInSeconds);
     }
   }
 
-  private static _Render(timeInMS: number): void {
-    const timeInSeconds = Math.min(timeInMS * 0.001, Game._minFrameTime);
+  private _Render(timeInMS: number): void {
+    const timeInSeconds = Math.min(timeInMS * 0.001, this._minFrameTime);
 
-    Game._OnStep(timeInSeconds);
-    Game._StepEntities(timeInSeconds);
-    Game._graphics.Render(timeInSeconds);
+    this._OnStep(timeInSeconds);
+    this._StepEntities(timeInSeconds);
+    this._graphics.Render(timeInSeconds);
 
-    Game._RAF();
+    this._RAF();
   }
 
-  private static _OnInitialize(): void {
+  _OnInitialize(): void {
     console.log("On initialize ...");
   }
 
-  private static _OnStep(timeInSeconds: number): void {
+  _OnStep(timeInSeconds: number): void {
     // todoo
   }
+  onDispose() {
+    this._graphics.onDispose();
+  }
 }
+
+export const game = {
+  Game: _Game,
+};

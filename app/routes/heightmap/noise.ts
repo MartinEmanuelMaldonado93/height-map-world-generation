@@ -48,6 +48,4 @@ class _NoiseGenerator {
   }
 }
 
-export const noise = {
-  Noise: _NoiseGenerator,
-};
+export { _NoiseGenerator as Noise };

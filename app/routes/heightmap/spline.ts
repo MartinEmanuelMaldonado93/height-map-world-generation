@@ -7,12 +7,12 @@ class CubicHermiteSpline {
     y1: number,
     y2: number,
     y3: number
-  ) => number; 
+  ) => number;
   // constructor to initialize the spline with a given interpolation function
   constructor(
     lerp: (t: number, y0: number, y1: number, y2: number, y3: number) => number
   ) {
-    this._points = []; 
+    this._points = [];
     this._lerp = lerp;
   }
 
@@ -46,8 +46,8 @@ class CubicHermiteSpline {
     // Interpolate using the neighboring points
     return this._lerp(
       (t - this._points[p1][0]) / (this._points[p2][0] - this._points[p1][0]), // Normalized time
-      this._points[p0][1], 
-      this._points[p1][1], 
+      this._points[p0][1],
+      this._points[p1][1],
       this._points[p2][1],
       this._points[p3][1]
     );
@@ -55,4 +55,4 @@ class CubicHermiteSpline {
 }
 
 // Export the CubicHermiteSpline class
-export { CubicHermiteSpline };
+export { CubicHermiteSpline as spline };
