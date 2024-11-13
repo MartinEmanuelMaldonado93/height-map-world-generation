@@ -1,20 +1,11 @@
 import dat, { GUI } from "dat.gui";
-import { game } from "./game";
-import { Sky } from "three/examples/jsm/objects/Sky.js";
-import { graphics } from "./graphics";
-import { Noise } from "./noise";
-import { TextureAtlas } from "./textures";
-import { OrbitControls } from "three-orbitcontrols-ts";
 import {
-  BufferGeometry,
   Color,
   FrontSide,
   Geometry,
   Group,
   Mesh,
   MeshStandardMaterial,
-  Plane,
-  PlaneBufferGeometry,
   PlaneGeometry,
   Scene,
   TextureLoader,
@@ -22,13 +13,20 @@ import {
   Vector3,
   VertexColors,
 } from "three";
+import { OrbitControls } from "three-orbitcontrols-ts";
+import { Sky } from "three/examples/jsm/objects/Sky.js";
+import { game } from "./game";
+import { graphics } from "./graphics";
 import { math } from "./math";
+import { Noise } from "./noise";
+import { TextureAtlas } from "./textures";
 
+let instance: ProceduralTerrain_Demo | null = null;
 export default function World() {
-  const demo = new ProceduralTerrain_Demo();
-  return {
-    dispose: demo.onDispose,
-  };
+  if (!instance) {
+    instance = new ProceduralTerrain_Demo();
+  }
+  return instance;
 }
 
 type guiProps = {
@@ -65,15 +63,13 @@ class ProceduralTerrain_Demo extends game.Game {
       gui: this._gui,
       guiParams: this._guiParams,
     });
-    this._LoadBackground();
+    // this._LoadBackground();
   }
-
   private _CreateGUI() {
     this._guiParams = {
       general: {},
     };
     this._gui = new dat.GUI();
-    // const generalRollup = this._gui.addFolder("General");
     this._gui.close();
   }
 
@@ -84,13 +80,20 @@ class ProceduralTerrain_Demo extends game.Game {
     );
     controls.target.set(0, 50, 0);
     controls.object.position.set(475, 345, 900);
+    controls.maxPolarAngle = Math.PI / 2;
     controls.update();
     return controls;
   }
 
-  private _LoadBackground() {
+  _LoadDefaultBackground() {
     const loader = new TextureLoader(this._textures._manager);
     loader.load("/resources/heightmap-simondev.jpg", (result) => {
+      this._entities["_terrain"].SetHeightmap(result.image);
+    });
+  }
+  onLoadBackground(url: string) {
+    const loader = new TextureLoader();
+    loader.load(url, (result) => {
       this._entities["_terrain"].SetHeightmap(result.image);
     });
   }
@@ -99,7 +102,6 @@ class ProceduralTerrain_Demo extends game.Game {
   }
   _OnStep(timeInSeconds: number) {}
 }
-
 class TerrainSky {
   private _sky!: Sky;
 
