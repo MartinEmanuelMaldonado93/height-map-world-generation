@@ -2,11 +2,12 @@ import React, { useRef, useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { useDrawContext } from "../context/drawCanvasCtx";
 import { motion } from "motion/react";
+import { GiPencil, GiTrashCan } from "react-icons/gi";
 
 function DrawingCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null!);
   const drawing = useRef<boolean>(false);
-  const { setUrlData } = useDrawContext();
+  const { setUrlData, setRestoreOriginalTerrain } = useDrawContext();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -16,22 +17,26 @@ function DrawingCanvas() {
 
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 2;
+    ctx.fillStyle = "white";
+    const radio = 5;
 
     const startDrawing = (event: React.MouseEvent<HTMLCanvasElement>) => {
       drawing.current = true;
       const rect = canvasRef.current.getBoundingClientRect();
-      ctx.beginPath();
-      ctx.moveTo(event.clientX - rect.left, event.clientY - rect.top);
+      drawPoint(event.clientX - rect.left, event.clientY - rect.top);
     };
 
     const draw = (event: React.MouseEvent<HTMLCanvasElement>) => {
       const rect = canvasRef.current.getBoundingClientRect();
       if (drawing.current) {
-        ctx.lineTo(event.clientX - rect.left, event.clientY - rect.top);
-        ctx.stroke();
+        drawPoint(event.clientX - rect.left, event.clientY - rect.top);
       }
+    };
+
+    const drawPoint = (x: number, y: number) => {
+      ctx.beginPath();
+      ctx.arc(x, y, radio, 0, Math.PI * 2);
+      ctx.fill();
     };
 
     const stopDrawing = () => {
@@ -62,12 +67,13 @@ function DrawingCanvas() {
   function clearCanvas() {
     const ctx = canvasRef.current.getContext("2d");
     if (!ctx) return;
-    const [w, y] = [canvasRef.current.width, canvasRef.current.height];
-    ctx.clearRect(0, 0, w, y);
+    const w = canvasRef.current.clientWidth;
+    const h = canvasRef.current.clientHeight;
+
+    ctx.clearRect(0, 0, w, h);
     ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, w, y);
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, w, y);
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = "white"; // come back to white after clear the board
   }
   return (
     <div className="relative p-4 pl-0">
@@ -77,7 +83,7 @@ function DrawingCanvas() {
         ref={canvasRef}
         width={300}
         height={300}
-        className="z-10 border border-black rounded-md absolute top-3/4 left-0 m-4 ml-0"
+        className="z-10 cursor-crosshair border border-black rounded-md absolute top-3/4 left-0 m-4 ml-0"
       />
       <br />
       <motion.div
@@ -90,14 +96,19 @@ function DrawingCanvas() {
         className="flex gap-4"
       >
         <Button onClick={() => saveCanvas()} variant={"secondary"}>
-          Draw
+          Draw <GiPencil />
         </Button>
         <Button variant={"secondary"} onClick={() => clearCanvas()}>
-          Clean
+          Clean <GiTrashCan />
         </Button>
-        <Button variant={"secondary"} onClick={() => {}}>
+        {/* <Button
+          variant={"secondary"}
+          onClick={() => {
+            setRestoreOriginalTerrain(true);
+          }}
+        >
           Clean Terrain ⛰️
-        </Button>
+        </Button> */}
       </motion.div>
     </div>
   );

@@ -12,7 +12,7 @@ export default function Index() {
     <DrawContextProvider>
       <div className="min-h-screen ">
         <div className="p-4 absolute z-10">
-          <h1 className="px-2 py-1">Height Map Generation</h1>
+          <h1 className="px-2 py-1">Height Map Generation ⛰️</h1>
           <Button
             className="text-xs"
             onClick={() => setIsOpenCanvas(!openCanvas)}
@@ -20,7 +20,7 @@ export default function Index() {
           >
             {openCanvas ? "X" : "Open blackboard"}
           </Button>
-          <AnimatePresence >{openCanvas && <DrawingCanvas />}</AnimatePresence>
+          <AnimatePresence>{openCanvas && <DrawingCanvas />}</AnimatePresence>
         </div>
         <WorldScene />
         <div id="target" className="h-full absolute"></div>
@@ -36,6 +36,7 @@ function WorldScene() {
     const world = World();
     world.onLoadBackground(state.url_data);
     state.setUrlData("");
-  }, [state.url_data]);
+    // state.restoreOriginalTerrain && world.onResetTerrain();
+  }, [state.url_data, state.restoreOriginalTerrain]);
   return null;
 }

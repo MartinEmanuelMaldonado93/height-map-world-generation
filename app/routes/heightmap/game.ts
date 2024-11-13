@@ -55,11 +55,11 @@ export class _Game {
   }
 
   _OnInitialize(): void {
-    console.log("On initialize ...");
+    // override this method;
   }
 
   _OnStep(timeInSeconds: number): void {
-    // todoo
+    // override this method;
   }
   onDispose() {
     this._graphics.onDispose();

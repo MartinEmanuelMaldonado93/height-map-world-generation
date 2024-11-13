@@ -20,6 +20,29 @@ import { graphics } from "./graphics";
 import { math } from "./math";
 import { Noise } from "./noise";
 import { TextureAtlas } from "./textures";
+import studio from "@theatre/studio";
+import { getProject, types } from "@theatre/core";
+import animatedSceneJSON from "../../../public/resources/animated-scene.json";
+
+if (import.meta.env.DEV) {
+  studio.initialize();
+}
+
+const project = getProject("THREE.js x Theatre.js", {
+  state: animatedSceneJSON,
+});
+const sheet = project.sheet("Animated scene");
+project.ready.then(() => sheet.sequence.play());
+
+const theatreCamera = sheet.object("Camera", {
+  position: { x: 0, y: 0, z: 1400 },
+  rotation: {
+    x: types.number(0, { range: [-Math.PI, Math.PI * 2] }),
+    y: types.number(0, { range: [-Math.PI, Math.PI * 2] }),
+    z: types.number(0, { range: [-Math.PI, Math.PI * 2] }),
+  },
+  zoom: 1,
+});
 
 let instance: ProceduralTerrain_Demo | null = null;
 export default function World() {
@@ -63,7 +86,19 @@ class ProceduralTerrain_Demo extends game.Game {
       gui: this._gui,
       guiParams: this._guiParams,
     });
-    // this._LoadBackground();
+    theatreCamera.onValuesChange((v) => {
+      this._graphics._camera.position.set(
+        v.position.x,
+        v.position.y,
+        v.position.z
+      );
+      this._graphics._camera.rotation.set(
+        v.rotation.x,
+        v.rotation.y,
+        v.rotation.z
+      );
+      // add zoom to orbit control
+    });
   }
   private _CreateGUI() {
     this._guiParams = {
@@ -81,6 +116,7 @@ class ProceduralTerrain_Demo extends game.Game {
     controls.target.set(0, 50, 0);
     controls.object.position.set(475, 345, 900);
     controls.maxPolarAngle = Math.PI / 2;
+    controls.enableZoom = true;
     controls.update();
     return controls;
   }
@@ -96,6 +132,9 @@ class ProceduralTerrain_Demo extends game.Game {
     loader.load(url, (result) => {
       this._entities["_terrain"].SetHeightmap(result.image);
     });
+  }
+  onResetTerrain() {
+    // reset the entire terrain 
   }
   onDispose() {
     this.onDispose();
@@ -194,6 +233,7 @@ class TerrainChunkManager {
 
   constructor(params: guiProps) {
     this._chunkSize = 500;
+    this._params = params;
     this._Init(params);
   }
 
@@ -213,7 +253,7 @@ class TerrainChunkManager {
       noiseType: "simplex",
       seed: 1,
     };
-
+    /** It rebuild all the chunks */
     const onNoiseChanged = () => {
       for (let k in this._chunks) {
         this._chunks[k].chunk.Rebuild();
@@ -262,6 +302,7 @@ class TerrainChunkManager {
 
     this._group = new Group();
     this._group.rotation.x = -Math.PI / 2;
+    this._group.rotation.z = -Math.PI;
 
     params.scene.add(this._group);
 
@@ -274,7 +315,7 @@ class TerrainChunkManager {
     });
 
     this._chunks = {};
-    this._params = params;
+    // this._params = params;
 
     for (let x = -1; x <= 1; x++) {
       for (let z = -1; z <= 1; z++) {
@@ -335,6 +376,11 @@ class TerrainChunkManager {
     }
   }
 
+  // New method to restore original terrain
+  public RestoreOriginalTerrain() {
+    // Restore original noise parameters
+    this._params.guiParams.noise = { ...this._noise };
+  }
   public Update(timeInSeconds: number) {
     // Update logic here
   }
